@@ -6,7 +6,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 cors = CORS(app, origins='*')
 
-DATABASE = 'count.db'
+DATABASE = '/nfs/count.db'
 
 def get_db():
     db = sqlite3.connect(DATABASE)
