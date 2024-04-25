@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hendris3-deployment-flask
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hendris3-app-flask
+  template:
+    metadata:
+      labels:
+        app: hendris3-app-flask
+    spec:
+      containers:
+        - name: hendris3-container-flask
+          image: cithit/hendris3-flask:latest
+          ports:
+            - containerPort: 5000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hendris3-service-flask
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5000
+      targetPort: 5000
+  selector:
+    app: hendris3-app-flask
