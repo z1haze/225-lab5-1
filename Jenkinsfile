@@ -3,8 +3,7 @@ pipeline {
 
     environment {
         DOCKER_CREDENTIALS_ID = 'roseaw-dockerhub'
-        DOCKER_IMAGE_FLASK = "cithit/hendris3-flask"
-        DOCKER_IMAGE_REACT = "cithit/hendris3-react"
+        DOCKER_IMAGE = 'cithit/hendris3'
         IMAGE_TAG = "build-${BUILD_NUMBER}"
         GITHUB_URL = 'https://github.com/z1haze/225-lab5-1.git'
         KUBECONFIG = credentials('hendris3-225')
@@ -41,8 +40,7 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    docker.build("${env.DOCKER_IMAGE_FLASK}:${env.IMAGE_TAG}", "-f Dockerfile.flask .")
-                    docker.build("${env.DOCKER_IMAGE_REACT}:${env.IMAGE_TAG}", "-f Dockerfile.react .")
+                    docker.build("${env.DOCKER_IMAGE}:${env.IMAGE_TAG}")
                 }
             }
         }
@@ -51,8 +49,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', "${env.DOCKER_CREDENTIALS_ID}") {
-                        docker.image("${env.DOCKER_IMAGE_FLASK}:$IMAGE_TAG").push()
-                        docker.image("${env.DOCKER_IMAGE_REACT}:$IMAGE_TAG").push()
+                        docker.image("${env.DOCKER_IMAGE}:$IMAGE_TAG").push()
                     }
                 }
             }
@@ -61,10 +58,8 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    sh "sed -i 's|${env.DOCKER_IMAGE_FLASK}:latest|${env.DOCKER_IMAGE_FLASK}:${env.IMAGE_TAG}|' deployment-flask.yaml"
-                    sh "kubectl apply -f deployment-flask.yaml"
-                    sh "sed -i 's|${env.DOCKER_IMAGE_REACT}:latest|${env.DOCKER_IMAGE_REACT}:${env.IMAGE_TAG}|' deployment-react.yaml"
-                    sh "kubectl apply -f deployment-react.yaml"
+                    sh "sed -i 's|${env.DOCKER_IMAGE}:latest|${env.DOCKER_IMAGE}:${env.IMAGE_TAG}|' prod-deployment.yaml"
+                    sh "kubectl apply -f prod-deployment.yaml"
                 }
             }
         }

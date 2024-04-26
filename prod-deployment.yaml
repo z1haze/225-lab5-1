@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -33,39 +34,71 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hendris3-deployment-flask
+  name: my-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: hendris3-app-flask
+      app: my-app
   template:
     metadata:
       labels:
-        app: hendris3-app-flask
+        app: my-app
     spec:
-      containers:
-        - name: hendris3-container-flask
-          image: cithit/hendris3-flask:latest
-          ports:
-            - containerPort: 5000
-          volumeMounts:
-            - name: nfs-storage
-              mountPath: /nfs
       volumes:
         - name: nfs-storage
           persistentVolumeClaim:
             claimName: lab5-1-pvc
+      containers:
+        - name: app-container
+          image: cithit/hendris3:latest
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: nfs-storage
+              mountPath: /nfs
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: hendris3-service-flask
+  name: my-service-1
+spec:
+  type: LoadBalancer
+  loadBalancerIP: 10.48.10.214
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  selector:
+    app: my-app
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+spec:
+  rules:
+    - http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: my-service-1
+                port:
+                  number: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service-2
 spec:
   type: ClusterIP
   ports:
     - port: 5000
       targetPort: 5000
   selector:
-    app: hendris3-app-flask
+    app: my-app
