@@ -20,7 +20,7 @@ pipeline {
             }
         }
 
-        stage('Get Commit Details') {
+        stage('Collect') {
             steps {
                 script {
                     env.GIT_COMMIT_MSG = sh (script: 'git log -1 --pretty=%B ${GIT_COMMIT}', returnStdout: true).trim()
@@ -29,23 +29,25 @@ pipeline {
             }
         }
 
-        stage('Build Flask Docker Image') {
+        stage('Lint') {
             steps {
-                script {
-                    docker.build("${env.DOCKER_IMAGE_FLASK}:${env.IMAGE_TAG}", "-f Dockerfile.flask .")
+                dir('client') {
+                    sh 'npm install'
+                    sh 'npm run lint'
                 }
             }
         }
 
-        stage('Build React Docker Image') {
+        stage('Build') {
             steps {
                 script {
+                    docker.build("${env.DOCKER_IMAGE_FLASK}:${env.IMAGE_TAG}", "-f Dockerfile.flask .")
                     docker.build("${env.DOCKER_IMAGE_REACT}:${env.IMAGE_TAG}", "-f Dockerfile.react .")
                 }
             }
         }
 
-        stage('Push Docker Images') {
+        stage('Push') {
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', "${env.DOCKER_CREDENTIALS_ID}") {
@@ -56,21 +58,12 @@ pipeline {
             }
         }
 
-        stage('Deploy Flask App') {
+        stage('Deploy') {
             steps {
                 script {
                     sh "sed -i 's|${env.DOCKER_IMAGE_FLASK}:latest|${env.DOCKER_IMAGE_FLASK}:${env.IMAGE_TAG}|' deployment-flask.yaml"
-                    sh "cd .."
                     sh "kubectl apply -f deployment-flask.yaml"
-                }
-            }
-        }
-
-        stage('Deploy React App') {
-            steps {
-                script {
                     sh "sed -i 's|${env.DOCKER_IMAGE_REACT}:latest|${env.DOCKER_IMAGE_REACT}:${env.IMAGE_TAG}|' deployment-react.yaml"
-                    sh "cd .."
                     sh "kubectl apply -f deployment-react.yaml"
                 }
             }
