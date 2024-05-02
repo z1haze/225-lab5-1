@@ -23,7 +23,6 @@ pipeline {
             steps {
                 script {
                     env.GIT_COMMIT_MSG = sh (script: 'git log -1 --pretty=%B ${GIT_COMMIT}', returnStdout: true).trim()
-                    env.GIT_AUTHOR = sh (script: 'git log -1 --pretty=%cn ${GIT_COMMIT}', returnStdout: true).trim()
                 }
             }
         }
@@ -40,7 +39,7 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    docker.build("${env.DOCKER_IMAGE}:${env.IMAGE_TAG}")
+                    docker.build("${env.DOCKER_IMAGE}:${env.IMAGE_TAG}", "-f Dockerfile.combo .")
                 }
             }
         }
@@ -55,7 +54,7 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy to Production') {
             steps {
                 script {
                     sh "sed -i 's|${env.DOCKER_IMAGE}:latest|${env.DOCKER_IMAGE}:${env.IMAGE_TAG}|' prod-deployment.yaml"
@@ -65,17 +64,17 @@ pipeline {
         }
     }
 
-    post {
-        success {
-            slackSend color: "good", message: "Build Succeeded: ${env.JOB_NAME}-${env.BUILD_NUMBER} - ${env.GIT_COMMIT_MSG} by ${env.GIT_AUTHOR}"
-        }
-
-        unstable {
-            slackSend color: "warning", message: "Build Finished: ${env.JOB_NAME}-${env.BUILD_NUMBER} - ${env.GIT_COMMIT_MSG} by ${env.GIT_AUTHOR}"
-        }
-
-        failure {
-            slackSend color: "danger", message: "Build Failed: ${env.JOB_NAME}-${env.BUILD_NUMBER} - ${env.GIT_COMMIT_MSG} by ${env.GIT_AUTHOR}"
-        }
-    }
+//     post {
+//         success {
+//             slackSend color: "good", message: "Build Succeeded: ${env.JOB_NAME}-${env.BUILD_NUMBER} - ${env.GIT_COMMIT_MSG}"
+//         }
+//
+//         unstable {
+//             slackSend color: "warning", message: "Build Finished: ${env.JOB_NAME}-${env.BUILD_NUMBER} - ${env.GIT_COMMIT_MSG}"
+//         }
+//
+//         failure {
+//             slackSend color: "danger", message: "Build Failed: ${env.JOB_NAME}-${env.BUILD_NUMBER} - ${env.GIT_COMMIT_MSG}"
+//         }
+//     }
 }

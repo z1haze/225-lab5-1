@@ -1,0 +1,43 @@
+# This Dockerfile builds the React client and API together
+
+# Build stage #1: build the React front end
+FROM node:18 as build-stage
+
+WORKDIR /app
+ENV PATH /app/node_modules/.bin:$PATH
+
+# copy only dependency files into the workdir to take advanced of caching because these don't change often
+COPY client/package*.json ./
+
+# istall dependencies
+RUN npm install
+
+# copy the rest of the source files into the workdir
+COPY client .
+
+# run the client builder which will output to the dist folder
+RUN npm run build
+
+# Build stage #2: build the API with the client as static files
+FROM python:3.9
+WORKDIR /app
+
+# move the built files from the previous container into the current container
+COPY --from=build-stage /app/dist ./dist
+
+# create a directory that will hold our API stuff in the container
+RUN mkdir ./api
+
+# copy the api files into the container
+COPY api ./api
+
+# install dependencies
+RUN pip install -r ./api/requirements.txt
+
+# expose the port for which the API will run
+EXPOSE 5000
+
+# change directory for the CMD to be run
+WORKDIR /app/api
+
+CMD ["gunicorn", "-b", ":5000", "api:app"]

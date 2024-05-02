@@ -1,10 +1,8 @@
 import os
 import sqlite3
 from flask import Flask, jsonify
-from flask_cors import CORS
 
-app = Flask(__name__)
-cors = CORS(app, origins='*')
+app = Flask(__name__, static_folder='../dist', static_url_path='/')
 
 DATABASE = '/nfs/count.db'
 
@@ -27,12 +25,24 @@ def init_db():
 
 init_db()
 
+
+@app.errorhandler(404)
+def not_found(e):
+    return app.send_static_file('index.html')
+
+
+@app.route('/')
+def index():
+    return app.send_static_file('index.html')
+
+
 @app.route('/api/count', methods=['GET'])
 def count():
     db = get_db()
     row = db.execute('SELECT amount FROM count LIMIT 1').fetchone()
 
     return jsonify({"count": row['amount']})
+
 
 @app.route('/api/count/increment', methods=['POST'])
 def increment():
@@ -43,7 +53,3 @@ def increment():
     db.commit()
 
     return jsonify({"count": new_amount})
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(debug=True, host='0.0.0.0', port=port)
