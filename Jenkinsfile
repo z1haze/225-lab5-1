@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs '18.20.2'
+    }
+
     environment {
         DOCKER_CREDENTIALS_ID = 'roseaw-dockerhub'
         DOCKER_IMAGE = 'cithit/hendris3'
