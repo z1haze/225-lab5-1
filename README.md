@@ -14,5 +14,6 @@ Some of the details of this project:
   - A simple set of REST endpoints to get and increment a counter value
   - Render the frontend index.html file
 - The project is deployed in a Docker container through kubernetes.
-  - There are both dev and prod deployments which run live data tests and database rollbacks
-in the test environment using python with selenium.
+  - There are both dev and prod deployments which run live data tests and database rollbacks in the test environment using python with selenium.
+  - pytest is used to run tests in the backend test environment
+  - Dastardly is used to run security scans on the backend
