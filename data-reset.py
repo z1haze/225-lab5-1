@@ -3,7 +3,9 @@ import sqlite3
 DATABASE = '/nfs/count.db'
 
 def connect_db():
-    return sqlite3.connect(DATABASE)
+    db = sqlite3.connect(DATABASE)
+    db.row_factory = sqlite3.Row
+    return db
 
 def rollback_count():
     db = connect_db()
