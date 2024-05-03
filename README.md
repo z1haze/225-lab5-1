@@ -1,8 +1,18 @@
-# React + Vite
+# CIT-225 Final Lab
+### Stephen Hendricks
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This lab is a culmination of everything that I've learned throughout this course. My lab here is a boilerplate
+for creating a simple backend webserver in flask, and a frontend in React.
 
-Currently, two official plugins are available:
+Some of the details of this project:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- React frontend built with vite and has the following features
+  - Linting with ESLint
+  - Unit testing with vitest
+  - API mocking with msw
+- The backend is built with flask and has the following features
+  - A simple set of REST endpoints to get and increment a counter value
+  - Render the frontend index.html file
+- The project is deployed in a Docker container through kubernetes.
+  - There are both dev and prod deployments which run live data tests and database rollbacks
+in the test environment using python with selenium.
