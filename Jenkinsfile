@@ -20,11 +20,7 @@ pipeline {
                     $class: 'GitSCM', branches: [[name: '*/main']],
                     userRemoteConfigs: [[url: "${env.GITHUB_URL}"]]
                 ])
-            }
-        }
 
-        stage('Collect') {
-            steps {
                 script {
                     env.GIT_COMMIT_MSG = sh (script: 'git log -1 --pretty=%B ${GIT_COMMIT}', returnStdout: true).trim()
                 }
@@ -69,27 +65,40 @@ pipeline {
             }
         }
 
-//         stage('Deploy Prod') {
-//             steps {
-//                 script {
-//                     sh "sed -i 's|${env.DOCKER_IMAGE}:latest|${env.DOCKER_IMAGE}:${env.IMAGE_TAG}|' prod-deployment.yaml"
-//                     sh "kubectl apply -f prod-deployment.yaml"
-//                 }
-//             }
-//         }
+        stage("Run Live Tests") {
+            steps {
+                script {
+                    sh 'docker stop qa-tests || true'
+                    sh 'docker rm qa-tests || true'
+                    sh 'docker build -t qa-tests -f Dockerfile.test .'
+                    sh 'docker run qa-tests'
+                    sh 'docker stop qa-tests || true'
+                    sh 'docker rm qa-tests || true'
+                }
+            }
+        }
+
+        stage('Deploy Prod') {
+            steps {
+                script {
+                    sh "sed -i 's|${env.DOCKER_IMAGE}:latest|${env.DOCKER_IMAGE}:${env.IMAGE_TAG}|' prod-deployment.yaml"
+                    sh "kubectl apply -f prod-deployment.yaml"
+                }
+            }
+        }
     }
 
-//     post {
-//         success {
-//             slackSend color: "good", message: "Build Succeeded: ${env.JOB_NAME}-${env.BUILD_NUMBER} - ${env.GIT_COMMIT_MSG}"
-//         }
-//
-//         unstable {
-//             slackSend color: "warning", message: "Build Finished: ${env.JOB_NAME}-${env.BUILD_NUMBER} - ${env.GIT_COMMIT_MSG}"
-//         }
-//
-//         failure {
-//             slackSend color: "danger", message: "Build Failed: ${env.JOB_NAME}-${env.BUILD_NUMBER} - ${env.GIT_COMMIT_MSG}"
-//         }
-//     }
+    post {
+        success {
+            slackSend color: "good", message: "Build Succeeded: ${env.JOB_NAME}-${env.BUILD_NUMBER} - ${env.GIT_COMMIT_MSG}"
+        }
+
+        unstable {
+            slackSend color: "warning", message: "Build Finished: ${env.JOB_NAME}-${env.BUILD_NUMBER} - ${env.GIT_COMMIT_MSG}"
+        }
+
+        failure {
+            slackSend color: "danger", message: "Build Failed: ${env.JOB_NAME}-${env.BUILD_NUMBER} - ${env.GIT_COMMIT_MSG}"
+        }
+    }
 }
