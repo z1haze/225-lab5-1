@@ -30,6 +30,7 @@ RUN mkdir ./api
 
 # copy the api files into the container
 COPY api ./api
+COPY data-reset.py ./api
 
 # install dependencies
 RUN pip install -r ./api/requirements.txt
