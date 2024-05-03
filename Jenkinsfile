@@ -103,7 +103,7 @@ pipeline {
             steps {
                 script {
                     // Run the python script to generate data to add to the database
-                    def appPod = sh(script: "kubectl get pods -l app=app -o jsonpath='{.items[0].metadata.name}'", returnStdout: true).trim()
+                    def appPod = sh(script: "kubectl get pods -l app=api -o jsonpath='{.items[0].metadata.name}'", returnStdout: true).trim()
                     sh "kubectl exec ${appPod} -- python3 data-reset.py"
                 }
             }
