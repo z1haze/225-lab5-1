@@ -34,7 +34,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: api-deployment
+  name: api-deployment-dev
 spec:
   replicas: 1
   selector:
@@ -62,7 +62,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: api-service
+  name: api-service-prod
 spec:
   type: LoadBalancer
   loadBalancerIP: 10.48.10.214

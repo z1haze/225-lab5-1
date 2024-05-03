@@ -54,14 +54,23 @@ pipeline {
             }
         }
 
-        stage('Deploy to Production') {
+        stage('Deploy Dev') {
             steps {
                 script {
-                    sh "sed -i 's|${env.DOCKER_IMAGE}:latest|${env.DOCKER_IMAGE}:${env.IMAGE_TAG}|' prod-deployment.yaml"
-                    sh "kubectl apply -f prod-deployment.yaml"
+                    sh "sed -i 's|${env.DOCKER_IMAGE}:latest|${env.DOCKER_IMAGE}:${env.IMAGE_TAG}|' dev-deployment.yaml"
+                    sh "kubectl apply -f dev-deployment.yaml"
                 }
             }
         }
+
+//         stage('Deploy Prod') {
+//             steps {
+//                 script {
+//                     sh "sed -i 's|${env.DOCKER_IMAGE}:latest|${env.DOCKER_IMAGE}:${env.IMAGE_TAG}|' prod-deployment.yaml"
+//                     sh "kubectl apply -f prod-deployment.yaml"
+//                 }
+//             }
+//         }
     }
 
 //     post {
