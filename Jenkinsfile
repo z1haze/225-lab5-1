@@ -78,6 +78,16 @@ pipeline {
             }
         }
 
+        stage('Remove Test Data') {
+            steps {
+                script {
+                    // Run the python script to generate data to add to the database
+                    def appPod = sh(script: "kubectl get pods -l app=api-container-dev -o jsonpath='{.items[0].metadata.name}'", returnStdout: true).trim()
+                    sh "kubectl exec ${appPod} -- python3 data-reset.py"
+                }
+            }
+        }
+
         stage ("Run Security Checks") {
             steps {
                 sh 'docker pull public.ecr.aws/portswigger/dastardly:latest'
@@ -95,16 +105,6 @@ pipeline {
                 script {
                     sh "sed -i 's|${env.DOCKER_IMAGE}:latest|${env.DOCKER_IMAGE}:${env.IMAGE_TAG}|' prod-deployment.yaml"
                     sh "kubectl apply -f prod-deployment.yaml"
-                }
-            }
-        }
-
-        stage('Remove Test Data') {
-            steps {
-                script {
-                    // Run the python script to generate data to add to the database
-                    def appPod = sh(script: "kubectl get pods -l app=api -o jsonpath='{.items[0].metadata.name}'", returnStdout: true).trim()
-                    sh "kubectl exec ${appPod} -- python3 data-reset.py"
                 }
             }
         }
