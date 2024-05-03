@@ -46,7 +46,7 @@ spec:
         app: api
     spec:
       containers:
-        - name: api-container
+        - name: api-container-prod
           image: cithit/hendris3:latest
           ports:
             - containerPort: 5000

@@ -27,11 +27,13 @@ pipeline {
             }
         }
 
-        stage('Lint') {
+        stage('Lint & Test') {
             steps {
                 dir('client') {
+                    sh 'node -v'
                     sh 'npm install'
                     sh 'npm run lint'
+                    sh 'npm test'
                 }
             }
         }
